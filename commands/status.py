@@ -3,26 +3,26 @@ from bluetooth import Sender, Receiver
 
 class Status(Base):
     """Class to check the connection"""
-    name = "status"
-    @classmethod
-    def handler(cls, bot):
-        return super(Status, cls).handler(bot, cls.__callback)
+    name = "Status"
+    command = "status"
 
     @classmethod
-    def __callback(cls, bot):
+    def callbackHandler(cls, bot):
+        """Handler the command /status"""
         def callback(update, context):
             status = Status(bot, update.message)
             update.message.reply_text("Checking...")
+            status.logger.info("Checking Arduino")
             msgid = status.id
             status.send_typing()
             try:
-                receiver = Receiver(msgid, "status")
+                receiver = Receiver(msgid, Status.name)
                 receiver.listen(status.send_status)
 
-                sender = Sender(msgid, "status")
+                sender = Sender(msgid, Status.name)
                 sender.send("1")
-            except:
-                status.report_error(sys.exc_info()[0])
+            except Exception as e:
+                status.report_error("Unexpected error: " + str(e))
 
         return callback
 
@@ -32,4 +32,4 @@ class Status(Base):
 
     def report_error(self, msg):
         self.logger.error(msg)
-        self.bot.send_message(self.message.chat.id, "Unexpected error: " + msg)
+        self.bot.send_message(self.message.chat.id,  msg)
