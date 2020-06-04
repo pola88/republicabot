@@ -7,7 +7,9 @@ from telegram import Bot
 from telegram.ext import Updater, CommandHandler
 from telegram.ext.filters import Filters
 
-from commands import Status, Help, Start, Schedule
+from commands import StatusCommand, HelpCommand, StartCommand, ScheduleCommand
+from jobs import SchedulesJob
+from db import Setup, Schedule
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -23,19 +25,24 @@ def message(update, context):
     logger.info(update);
 
 def main():
-    #Instance bot to send msg for response when it needed
-    # bot = Bot(os.getenv("TELEGRAM_KEY"))
+    #Create database
+    Setup.run()
 
+    # Run schedules to check if there are jobs to run
+    schedules = SchedulesJob()
+    schedules.setup()
+
+    Schedule.queue = schedules.queue;
     # Create the Updater and pass it your bot's token.
     updater = Updater(os.getenv("TELEGRAM_KEY"), use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-    Start.setup(updater)
-    Help.setup(updater)
-    Status.setup(updater)
-    Schedule.setup(updater)
+    StartCommand.setup(updater)
+    HelpCommand.setup(updater)
+    StatusCommand.setup(updater)
+    ScheduleCommand.setup(updater)
 
     # log all errors
     dp.add_error_handler(error)

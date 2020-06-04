@@ -1,6 +1,6 @@
 from .base import Base
 
-class Help(Base):
+class HelpCommand(Base):
     """List help of commands"""
     name = "Help"
     command = "help"

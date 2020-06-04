@@ -1,7 +1,7 @@
 from .base import Base
-from .status import Status
-from .help import Help
-from .start import Start
-from .schedule import Schedule
+from .status import StatusCommand
+from .help import HelpCommand
+from .start import StartCommand
+from .schedule import ScheduleCommand
 
-__all__ = ('Status', 'Start', 'Help', 'Schedule')
+__all__ = ('StatusCommand', 'StartCommand', 'HelpCommand', 'ScheduleCommand')

@@ -1,6 +1,6 @@
 from .base import Base
 
-class Start(Base):
+class StartCommand(Base):
     """Start commands"""
     name = "Start"
     command = "start"

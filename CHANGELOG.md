@@ -7,6 +7,11 @@
 * Add `/schedule` command
 * Add `/start` command
 * Support to `add/show/remove` schedules on memory
+* Add `sqlite`
+* Add schedules jobs
+* Add queue to notify to schedules thread that schedules were updated
+* Refactor bluetooth msg filtering by msgId
+* Add classes to send msg via bluetooth
 
 ## 0.0.1
 

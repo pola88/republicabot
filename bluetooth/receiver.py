@@ -1,24 +1,25 @@
-from .base import Base
+from .connection import Connection
 from time import sleep
-import logging
 import threading
 
-# Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
-
-class Receiver(Base):
+class Receiver(Connection):
+    """
+        Class to start listen msg from bluetooth in a new thread until get the correct msg
+        It will check the id to see if the callback should be run
+    """
 
     def __listener(self):
         self.is_waiting = True
-        logging.info("Waiting msg");
+        self.logging.info("Waiting msg");
         while self.is_waiting:
             if(self.ser.in_waiting > 0):
-                self.msg = self.ser.readline().decode()
-                logging.info(self.msg)
-                self.is_waiting = False
+                msg = self.ser.readline().decode()
+                msgId = msg.split("_")[0]
+                self.msg = msg.split("_")[1]
+
+                if (self.id == int(msgId)):
+                    self.logging.info(self.msg)
+                    self.is_waiting = False
             sleep(1)
         self.callback(self.msg)
 

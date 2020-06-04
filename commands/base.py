@@ -33,7 +33,7 @@ class Base:
 
     @classmethod
     def filters(cls):
-        return (Filters.chat(os.getenv("GROUP_ID")) | Filters.chat(os.getenv("USER_ID")))
+        return (Filters.chat(int(os.getenv("GROUP_ID"))) | Filters.chat(int(os.getenv("USER_ID"))))
 
     @classmethod
     def callbackHandler(cls, bot):

@@ -1,10 +1,12 @@
 from .base import Base
 import logging
 import os
+from db import Schedule
 from telegram import (InlineKeyboardMarkup, InlineKeyboardButton)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 
+TIMEOUT = 5
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -20,20 +22,30 @@ SELECTING_LEVEL, SELECTING_GENDER = map(chr, range(4, 6))
 # State definitions for descriptions conversation
 SAVED_TIME, TYPING = map(chr, range(6, 8))
 
+#Schedule fields
+ID, TIME, DURATION = map(chr, range(8, 11))
+
 # Meta states
-STOPPING, SHOWING = map(chr, range(8, 10))
+STOPPING, SHOWING = map(chr, range(11, 13))
+
 # Shortcut for ConversationHandler.END
 END = ConversationHandler.END
 
-# Different constants for this example
-# (TIME, DURATION, SAVE, GENDER, MALE, SCHEDULES, AGE, NAME, START_OVER, NEW_TIME,
-#  CURRENT_FEATURE, CURRENT_CHAT) = map(chr, range(10, 22))
+(SAVE, SCHEDULES, START_OVER, NEW_TIME,
+ CURRENT_FEATURE, CURRENT_CHAT) = map(chr, range(13, 19))
 
-(TIME, DURATION, SAVE, SCHEDULES, START_OVER, NEW_TIME,
- CURRENT_FEATURE, CURRENT_CHAT) = map(chr, range(10, 18))
+def get_schedule():
+    _schedules = []
+    schedules = Schedule.find_all()
 
+    for schedule in schedules:
+        _schedules.append({ ID: schedule[0], TIME: schedule[1], DURATION: schedule[2] })
+
+    return _schedules
 
 def start(update, context):
+    context.user_data[SCHEDULES] = get_schedule()
+
     """Select an action: Adding/show/removing schedule."""
     text = 'To abort, simply type /stop.'
     buttons = []
@@ -44,7 +56,7 @@ def start(update, context):
         context.user_data[CURRENT_CHAT] = update.message.chat.id
 
 
-    if context.user_data[CURRENT_CHAT] in [os.getenv("USER_ID")]:
+    if context.user_data[CURRENT_CHAT] in [int(os.getenv("USER_ID"))]:
         buttons.append([
             InlineKeyboardButton(text='Add', callback_data=str(ADDING_SCHEDULE)),
             InlineKeyboardButton(text='Remove', callback_data=str(REMOVE_SCHEDULE))
@@ -70,8 +82,7 @@ def start(update, context):
 
 def show_remove_schedule(update, context):
     """Add information about youself."""
-    ud = context.user_data
-    schedules = ud.get(SCHEDULES)
+    schedules = get_schedule()
     buttons = []
 
     if not schedules:
@@ -82,10 +93,9 @@ def show_remove_schedule(update, context):
         for id, schedule in enumerate(schedules):
             btn_text = '\nTime: {0}, Duration: {1}'.format(schedule.get(TIME, '-'),
                                                         schedule.get(DURATION, '15'))
-            schedules_btns.append(InlineKeyboardButton(text=btn_text, callback_data="remove_" + str(id)))
+            schedules_btns.append(InlineKeyboardButton(text=btn_text, callback_data="remove_" + str(schedule.get(ID))))
         buttons.append(schedules_btns)
 
-    # InlineKeyboardButton(text='Add', callback_data=str(ADDING_SCHEDULE)),
     buttons.append([
         InlineKeyboardButton(text='Back', callback_data=str(END))
     ])
@@ -97,24 +107,23 @@ def show_remove_schedule(update, context):
     return SHOWING_TO_REMOVE
 
 def remove_schedule(update, context):
-    print("remove_schedule")
+    msg_id = int(update.callback_query.data.split('_')[1])
+    Schedule.delete_one(msg_id)
+
     return show_remove_schedule(update, context)
 
 def show_data(update, context):
-    """Pretty print gathered data."""
-    def prettyprint(user_data, level):
-        schedules = user_data.get(level)
-        if not schedules:
-            return '\nNo schedules yet.'
-
-        text = ''
-        for schedule in schedules:
-            text += '\nTime: {0}, Duration: {1}'.format(schedule.get(TIME, '-'),
-                                                        schedule.get(DURATION, '15 (default)'))
-        return text
-
     ud = context.user_data
-    text = 'Schedules:' + prettyprint(ud, SCHEDULES)
+    schedules = ud.get(SCHEDULES)
+    if not schedules:
+        schedule_list = '\nNo schedules yet.'
+
+    schedule_list = ''
+    for schedule in schedules:
+        schedule_list += '\nTime: {0}, Duration: {1}'.format(schedule.get(TIME, '-'),
+                                                    schedule.get(DURATION, '15 (default)'))
+
+    text = 'Schedules:' + schedule_list
 
     buttons = [[
         InlineKeyboardButton(text='Back', callback_data=str(END))
@@ -160,7 +169,7 @@ def select_level(update, context):
 
     # If we collect features for a new person, clear the cache and save the gender
     if not context.user_data.get(START_OVER):
-        context.user_data[NEW_TIME] = {}
+        context.user_data[NEW_TIME] = { DURATION: 15 }
         text = 'Please select a feature to update.'
 
         update.callback_query.answer()
@@ -176,11 +185,12 @@ def save(update, context):
     """Return to top level conversation."""
     ud = context.user_data
 
-    if not ud.get(SCHEDULES):
-        ud[SCHEDULES] = []
+    schedule = {
+        "time": ud[NEW_TIME][TIME],
+        "duration": ud[NEW_TIME][DURATION]
+    }
 
-    if ud.get(NEW_TIME):
-        ud[SCHEDULES].append(ud[NEW_TIME])
+    Schedule.create(schedule)
 
     context.user_data[START_OVER] = True
     start(update, context)
@@ -196,7 +206,10 @@ def back_to_main(update, context):
 def ask_for_time(update, context):
     """Prompt user to input data for selected feature."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
-    text = 'What time?'
+    if context.user_data[CURRENT_FEATURE] == TIME:
+        text = 'What time?'
+    else:
+        text = 'How long?'
 
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text)
@@ -220,7 +233,10 @@ def stop_nested(update, context):
 
     return STOPPING
 
-class Schedule(Base):
+def timeout(update, context):
+    update.message.reply_text('Timeout! Bye!')
+
+class ScheduleCommand(Base):
     """Class to add new schedule"""
     name = "Schedule"
     command = "schedule"
@@ -236,12 +252,12 @@ class Schedule(Base):
 
             states={
                 SHOWING_TO_REMOVE: [CallbackQueryHandler(remove_schedule,
-                                                         pattern='^remove_*')],
+                                                         pattern='^remove_*')]
             },
 
             fallbacks=[
                 CallbackQueryHandler(back_to_main, pattern='^' + str(END) + '$'),
-                CommandHandler('stop', stop_nested)
+                CommandHandler('stop', stop_nested, cls.filters())
             ],
 
             map_to_parent={
@@ -265,7 +281,7 @@ class Schedule(Base):
             fallbacks=[
                 CallbackQueryHandler(save, pattern='^' + str(SAVE) + '$'),
                 CallbackQueryHandler(back_to_main, pattern='^' + str(END) + '$'),
-                CommandHandler('stop', stop_nested)
+                CommandHandler('stop', stop_nested, cls.filters())
             ],
 
             map_to_parent={
@@ -287,17 +303,20 @@ class Schedule(Base):
         ]
 
         conv_handler = ConversationHandler(
-            entry_points=[CommandHandler(cls.command, start)],
+            entry_points=[CommandHandler(cls.command, start, cls.filters())],
+
+            conversation_timeout=TIMEOUT,
 
             states={
+                ConversationHandler.TIMEOUT: [MessageHandler(Filters.text | Filters.command, timeout)],
                 SHOWING: [CallbackQueryHandler(start, pattern='^' + str(END) + '$')],
                 SELECTING_ACTION: selection_handlers,
                 SELECTING_LEVEL: selection_handlers,
                 SAVED_TIME: selection_handlers,
-                STOPPING: [CommandHandler(cls.command, start)]
+                STOPPING: [CommandHandler(cls.command, start, cls.filters())]
             },
 
-            fallbacks=[CommandHandler('stop', stop)],
+            fallbacks=[CommandHandler('stop', stop, cls.filters())],
         )
 
         dp.add_handler(conv_handler)

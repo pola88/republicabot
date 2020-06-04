@@ -1,5 +1,5 @@
 from .base import Base
-from .receiver import Receiver
-from .sender import Sender
+from .status import Status
+from .watering import Watering
 
-__all__ = ('Base', 'Receiver', 'Sender')
+__all__ = ('Status', 'Watering')
