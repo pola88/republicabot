@@ -10,24 +10,20 @@ class Watering(Base):
             off: {id}_3
     """
 
-    def __init__(self, msgid):
+    def __init__(self, id):
         self.name = 'watering'
-        super().__init__(self, msgid)
+        super(self.__class__, self).__init__(id)
 
-    def on(self, duration):
-        try:
-            receiver = Receiver(self.id, Status.name)
-            receiver.listen(status.send_status)
+    def on(self, duration, callback):
+        receiver = Receiver(self.id, self.name)
+        receiver.listen(callback)
 
-            sender = Sender(self.id, Status.name)
-            sender.send("2_" + str(duration))
-        except Exception as e:
-            status.report_error("Unexpected error: " + str(e))
-        pass
+        sender = Sender(self.id, self.name)
+        sender.send("2_" + str(duration))
 
-    def off():
-        pass
+    def off(self, callback):
+        receiver = Receiver(self.id, self.name)
+        receiver.listen(callback)
 
-    def send_status(self, msg):
-        self.logger.info(msg)
-        self.bot.send_message(self.message.chat.id, "Arduino says: " + msg)
+        sender = Sender(self.id, self.name)
+        sender.send("3")
