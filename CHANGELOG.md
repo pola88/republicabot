@@ -1,5 +1,9 @@
 ## RepublicaBeerBot
 
+## 0.0.3
+
+* Add new commands `Alcohol70`, `Drink` and `Question`
+
 ## 0.0.2
 
 * Refactor commands classes

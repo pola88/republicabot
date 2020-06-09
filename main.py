@@ -7,8 +7,8 @@ from telegram import Bot
 from telegram.ext import Updater, CommandHandler
 from telegram.ext.filters import Filters
 
-from commands import (StatusCommand, HelpCommand, StartCommand,
-                      ScheduleCommand, WateringCommand)
+from commands import (StatusCommand, HelpCommand, StartCommand, Alcohol70Command,
+                      ScheduleCommand, WateringCommand, QuestionCommand, DrinkCommand)
 from jobs import SchedulesJob
 from db import Setup, Schedule
 
@@ -45,7 +45,10 @@ def main():
     StatusCommand.setup(updater)
     ScheduleCommand.setup(updater)
     WateringCommand.setup(updater)
-    
+    QuestionCommand.setup(updater)
+    Alcohol70Command.setup(updater)
+    DrinkCommand.setup(updater)
+
     # log all errors
     dp.add_error_handler(error)
 
