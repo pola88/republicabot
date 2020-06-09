@@ -1,6 +1,7 @@
 from .connection import Connection
 from time import sleep
 import threading
+import serial
 
 class Receiver(Connection):
     """
@@ -13,12 +14,19 @@ class Receiver(Connection):
         self.logging.info("Waiting msg");
         while self.is_waiting:
             if(self.ser.in_waiting > 0):
-                msg = self.ser.readline().decode()
-                msgId = msg.split("_")[0]
-                self.msg = msg.split("_")[1]
+                try:
+                    msg = self.ser.readline().decode()
+                    msgId = msg.split("_")[0]
+                    self.msg = msg.split("_")[1]
 
-                if (self.id == int(msgId)):
-                    self.logging.info(self.msg)
+                    if (self.id == int(msgId)):
+                        self.logging.info(self.msg)
+                        self.is_waiting = False
+                except serial.SerialTimeoutException as serialTimeout:
+                        self.loggin.error("Serial timeout")
+                        self.is_waiting = False
+                except Exception as e:
+                    self.loggin.error(str(e))
                     self.is_waiting = False
             sleep(1)
         self.callback(self.msg)

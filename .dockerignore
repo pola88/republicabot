@@ -1,0 +1,6 @@
+.env.example
+.gitignore
+CHANGELOG.md
+Pipfile
+Pipfile.lock
+README.md
