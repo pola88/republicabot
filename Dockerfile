@@ -1,6 +1,6 @@
 FROM python:3
 
-RUN echo "America/Argentina/Buenos_Aires" > /etc/timezone
+RUN ln -fs /usr/share/zoneinfo/America/Argentina/Buenos_Aires /etc/localtime
 RUN dpkg-reconfigure -f noninteractive tzdata
 
 COPY ./requirements.txt /republicaboot/requirements.txt
