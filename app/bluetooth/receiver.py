@@ -17,7 +17,7 @@ class Receiver(Connection):
                 try:
                     msg = self.ser.readline().decode()
                     msgId = msg.split("_")[0]
-                    self.msg = msg.split("_")[1]
+                    self.msg = msg.replace("{}_".format(msgId), "")
 
                     if (self.id == int(msgId)):
                         self.logging.info(self.msg)

@@ -1,5 +1,10 @@
 ## RepublicaBeerBot
 
+## 0.0.5
+
+* Support `Temperature` command
+* Update Readme
+
 ## 0.0.4
 
 * Set timezone to docker container

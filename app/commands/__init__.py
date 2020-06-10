@@ -7,6 +7,8 @@ from .watering import WateringCommand
 from .question import QuestionCommand
 from .alcohol70 import Alcohol70Command
 from .drink import DrinkCommand
+from .temperature import TemperatureCommand
 
 __all__ = ('StatusCommand', 'StartCommand', 'HelpCommand', 'DrinkCommand',
-            'ScheduleCommand', 'QuestionCommand', 'Alcohol70Command')
+           'ScheduleCommand', 'QuestionCommand', 'Alcohol70Command',
+           'TemperatureCommand')
