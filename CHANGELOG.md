@@ -1,5 +1,11 @@
 ## RepublicaBeerBot
 
+## 0.0.4
+
+* Set timezone to docker container
+* Add Watering function on schedules
+* Add `timeout` to `ConversationHandler`
+
 ## 0.0.3
 
 * Add new commands `Alcohol70`, `Drink` and `Question`

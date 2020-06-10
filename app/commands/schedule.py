@@ -6,7 +6,7 @@ from telegram import (InlineKeyboardMarkup, InlineKeyboardButton)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 
-TIMEOUT = 5
+TIMEOUT = 30
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -81,7 +81,6 @@ def start(update, context):
     return SELECTING_ACTION
 
 def show_remove_schedule(update, context):
-    """Add information about youself."""
     schedules = get_schedule()
     buttons = []
 
@@ -157,7 +156,6 @@ def end(update, context):
 # Second level conversation callbacks
 def select_level(update, context):
     """Choose to add a parent or a child."""
-    text = 'You may add a parent or a child. Also you can show the gathered data or go back.'
     buttons = [[
         InlineKeyboardButton(text='Time', callback_data=str(TIME)),
         InlineKeyboardButton(text='Duration', callback_data=str(DURATION))
@@ -170,7 +168,7 @@ def select_level(update, context):
     # If we collect features for a new person, clear the cache and save the gender
     if not context.user_data.get(START_OVER):
         context.user_data[NEW_TIME] = { DURATION: 15 }
-        text = 'Please select a feature to update.'
+        text = 'Please select a option.'
 
         update.callback_query.answer()
         update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
@@ -247,12 +245,14 @@ class ScheduleCommand(Base):
         dp = updater.dispatcher
 
         remove_schedule_conv = ConversationHandler(
+            conversation_timeout=TIMEOUT,
             entry_points=[CallbackQueryHandler(show_remove_schedule,
                                                pattern='^' + str(REMOVE_SCHEDULE) + '$')],
 
             states={
                 SHOWING_TO_REMOVE: [CallbackQueryHandler(remove_schedule,
-                                                         pattern='^remove_*')]
+                                                         pattern='^remove_*')],
+                ConversationHandler.TIMEOUT: [MessageHandler(Filters.text | Filters.command, timeout)],
             },
 
             fallbacks=[
@@ -269,13 +269,16 @@ class ScheduleCommand(Base):
         )
         # Set up second level ConversationHandler (adding a person)
         add_schedule_conv = ConversationHandler(
+            conversation_timeout=TIMEOUT,
+
             entry_points=[CallbackQueryHandler(select_level,
                                                pattern='^' + str(ADDING_SCHEDULE) + '$')],
 
             states={
                 SELECTING_LEVEL: [CallbackQueryHandler(ask_for_time,
                                                        pattern='^(?!' + str(END) + '|' + str(SAVE) + ').*$')],
-                TYPING: [MessageHandler(Filters.text, save_input)]
+                TYPING: [MessageHandler(Filters.text, save_input)],
+                ConversationHandler.TIMEOUT: [MessageHandler(Filters.text | Filters.command, timeout)],
             },
 
             fallbacks=[
@@ -285,6 +288,7 @@ class ScheduleCommand(Base):
             ],
 
             map_to_parent={
+                SHOWING: SAVE,
                 # Return to top level menu
                 END: SELECTING_ACTION,
                 # End conversation alltogether

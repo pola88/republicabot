@@ -3,6 +3,8 @@ import schedule
 import threading
 import queue
 from db import Schedule
+from bluetooth import Watering
+from random import randint
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -42,8 +44,10 @@ class SchedulesJob():
         logger.info("Schedules updated")
 
     def turn_on(self, duration):
-        print("Turn on watering")
-        pass
+        Watering(randint(0, 1000)).on(duration=duration, callback=self.callback_on)
+
+    def callback_on(self, msg):
+        logger.info(msg)
 
     @classmethod
     def getAll():
