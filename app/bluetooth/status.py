@@ -14,7 +14,7 @@ class Status(Base):
 
     def check(self, callback, callback_error):
         receiver = Receiver(self.id, self.name)
-        receiver.listen(callback)
+        receiver.listen(callback, callback_error)
 
         sender = Sender(self.id, self.name)
         sender.send("1")
