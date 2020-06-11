@@ -19,7 +19,7 @@ class WateringCommand(Base):
             watering.send_typing()
             try:
                 if message[1] == "on":
-                    Watering(msgid).on(duration=message[2], callback=watering.callback_on)
+                    Watering(msgid).on(duration=message[2], callback=watering.callback_on, callback_error=watering.report_error)
                 else:
                     Watering(msgid).off(callback=watering.callback_off)
             except Exception as e:
@@ -36,11 +36,11 @@ class WateringCommand(Base):
         result = int(msg)
         self.logger.info(msg)
         if result == 1:
-            self.bot.send_message(self.message.chat.id, "Arduino says: Watering on! ")
+            self.bot.send_message(self.message.chat.id, "Watering on!")
         elif result == 2:
-            self.bot.send_message(self.message.chat.id, "Arduino says: Watering is already running! ")
+            self.bot.send_message(self.message.chat.id, "Watering was already running!")
         else:
-            self.bot.send_message(self.message.chat.id, "Arduino says: I don't feel well, Could you check me?")
+            self.bot.send_message(self.message.chat.id, "There was a problem, Check and try later")
 
     def callback_off(self, msg):
         result = int(msg)
@@ -48,7 +48,7 @@ class WateringCommand(Base):
         if result == 1:
             self.bot.send_message(self.message.chat.id, "Arduino says: Watering off! ")
         else:
-            self.bot.send_message(self.message.chat.id, "Arduino says: I don't feel well, Could you check me?")
+            self.bot.send_message(self.message.chat.id, "There was a problem, Check and try later")
 
     def report_error(self, msg):
         self.logger.error(msg)

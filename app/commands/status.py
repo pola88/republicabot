@@ -16,7 +16,7 @@ class StatusCommand(Base):
             msgid = status.id
             status.send_typing()
             try:
-                Status(msgid).check(status.send_status)
+                Status(msgid).check(status.send_status, callback_error=status.report_error)
             except Exception as e:
                 status.report_error("Unexpected error: " + str(e))
 
@@ -28,7 +28,7 @@ class StatusCommand(Base):
         if result == 1:
             self.bot.send_message(self.message.chat.id, "Arduino says: I'm ok! ")
         else:
-            self.bot.send_message(self.message.chat.id, "Arduino says: I don't feel well, Could you check me?" + msg)
+            self.bot.send_message(self.message.chat.id, "There was a problem, Check and try later")
 
     def report_error(self, msg):
         self.logger.error(msg)

@@ -2,25 +2,25 @@ from .base import Base
 from bluetooth import Temperature
 
 class TemperatureCommand(Base):
-    """Class to turn on/off watering"""
+    """Class to get the temperature"""
     name = "Temperature"
     command = "temperature"
 
     @classmethod
     def callbackHandler(cls, bot):
-        """Handler the command /watering"""
+        """Handler the command /temperature"""
         def callback(update, context):
             message = update.message.text.split(" ")
 
-            watering = TemperatureCommand(bot, update.message)
+            temperature = TemperatureCommand(bot, update.message)
             update.message.reply_text("Ok, getting info...")
 
-            msgid = watering.id
-            watering.send_typing()
+            msgid = temperature.id
+            temperature.send_typing()
             try:
-                Temperature(msgid).get(callback=watering.blue_callback)
+                Temperature(msgid).get(callback=temperature.blue_callback, callback_error=temperature.report_error)
             except Exception as e:
-                watering.report_error("Unexpected error: " + str(e))
+                temperature.report_error("Unexpected error: " + str(e))
 
         return callback
 
@@ -34,7 +34,7 @@ class TemperatureCommand(Base):
         if status == 1:
             self.bot.send_message(self.message.chat.id, "Temperature: {} C \nHumidity: {} %".format(temperature, int(humidity)))
         else:
-            self.bot.send_message(self.message.chat.id, "Arduino says: I don't feel well, Could you check me?")
+            self.bot.send_message(self.message.chat.id, "There was a problem, Check and try later")
 
     def report_error(self, msg):
         self.logger.error(msg)

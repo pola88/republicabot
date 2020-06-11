@@ -13,8 +13,8 @@ class Receiver(Connection):
         self.is_waiting = True
         self.logging.info("Waiting msg");
         while self.is_waiting:
-            if(self.ser.in_waiting > 0):
-                try:
+            try:
+                if(self.ser.in_waiting > 0):
                     msg = self.ser.readline().decode()
                     msgId = msg.split("_")[0]
                     self.msg = msg.replace("{}_".format(msgId), "")
@@ -22,16 +22,20 @@ class Receiver(Connection):
                     if (self.id == int(msgId)):
                         self.logging.info(self.msg)
                         self.is_waiting = False
-                except serial.SerialTimeoutException as serialTimeout:
-                        self.loggin.error("Serial timeout")
-                        self.is_waiting = False
-                except Exception as e:
-                    self.loggin.error(str(e))
-                    self.is_waiting = False
+            except serial.SerialTimeoutException as serialTimeout:
+                self.loggin.error("Serial timeout")
+                self.callback_error("Serial timeout")
+                self.is_waiting = False
+            except Exception as e:
+                self.callback_error(str(e))
+                self.loggin.error(str(e))
+                self.is_waiting = False
             sleep(1)
-        self.callback(self.msg)
+        if self.msg:
+            self.callback(self.msg)
 
-    def listen(self, callback):
+    def listen(self, callback, callback_error):
         self.callback = callback
+        self.callback_error = callback_error
         self.worker = threading.Thread(name=self.name, target=self.__listener)
         self.worker.start()

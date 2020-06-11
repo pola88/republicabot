@@ -1,5 +1,9 @@
 ## RepublicaBeerBot
 
+## 0.0.6
+
+* Report bluetooth errors to Telegram
+
 ## 0.0.5
 
 * Support `Temperature` command

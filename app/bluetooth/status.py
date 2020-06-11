@@ -12,7 +12,7 @@ class Status(Base):
         self.name = 'Status'
         super(self.__class__, self).__init__(id)
 
-    def check(self, callback):
+    def check(self, callback, callback_error):
         receiver = Receiver(self.id, self.name)
         receiver.listen(callback)
 

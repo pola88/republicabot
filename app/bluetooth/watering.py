@@ -14,16 +14,16 @@ class Watering(Base):
         self.name = 'watering'
         super(self.__class__, self).__init__(id)
 
-    def on(self, duration, callback):
+    def on(self, duration, callback, callback_error):
         receiver = Receiver(self.id, self.name)
-        receiver.listen(callback)
+        receiver.listen(callback, callback_error)
 
         sender = Sender(self.id, self.name)
         sender.send("2_" + str(duration))
 
-    def off(self, callback):
+    def off(self, callback, callback_error):
         receiver = Receiver(self.id, self.name)
-        receiver.listen(callback)
+        receiver.listen(callback, callback_error)
 
         sender = Sender(self.id, self.name)
         sender.send("3")
