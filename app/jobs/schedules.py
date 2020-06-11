@@ -1,3 +1,4 @@
+import os
 import logging
 import schedule
 import threading
@@ -13,8 +14,9 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 class SchedulesJob():
-    def __init__(self, queue = None):
+    def __init__(self, queue = None, bot = None):
         self.queue = queue
+        self.bot = bot
 
     def setup(self):
         """Init thread to run schedules and setup the saved schedules"""
@@ -26,7 +28,7 @@ class SchedulesJob():
         self.__updated()
 
     def __run_or_update(self):
-        logger.info("Schedule running")
+        logger.info("Schedule Thread running")
         while self.is_running:
             try:
                 updated = self.queue.get(timeout=1)# or whatever
@@ -44,16 +46,18 @@ class SchedulesJob():
         logger.info("Schedules updated")
 
     def turn_on(self, duration):
-        Watering(randint(0, 1000)).on(duration=duration, callback=self.callback_on)
+        Watering(randint(0, 1000)).on(duration=duration, callback=self.callback, callback_error=self.callback_error)
 
-    def callback_on(self, msg):
+    def callback(self, msg):
         logger.info(msg)
+        result = int(msg)
+        if result == 1:
+            logger.info("Watering on!")
+        elif result == 2:
+            logger.info("Watering was already running!")
+        else:
+            self.bot.send_message(int(os.getenv("USER_ID")), "There was a problem, Check and try later")
 
-    @classmethod
-    def getAll():
-        """Get all schedules from sqlite"""
-        pass
-
-    def add():
-        """Add new schedule to sqlite and publish an update to queue"""
-        pass
+    def callback_error(self, msg):
+        logger.error(msg)
+        self.bot.send_message(int(os.getenv("USER_ID")), "Schedules::Error {}".format(msg))

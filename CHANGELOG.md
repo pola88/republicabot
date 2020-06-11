@@ -1,5 +1,10 @@
 ## RepublicaBeerBot
 
+## 0.0.7
+
+* Fixes schedule to turn watering on
+* Send error to user
+
 ## 0.0.6
 
 * Report bluetooth errors to Telegram

@@ -46,7 +46,7 @@ class WateringCommand(Base):
         result = int(msg)
         self.logger.info(msg)
         if result == 1:
-            self.bot.send_message(self.message.chat.id, "Arduino says: Watering off! ")
+            self.bot.send_message(self.message.chat.id, "Watering off! ")
         else:
             self.bot.send_message(self.message.chat.id, "There was a problem, Check and try later")
 

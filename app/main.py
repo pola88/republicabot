@@ -30,13 +30,14 @@ def main():
     #Create database
     Setup.run()
 
+    # Create the Updater and pass it your bot's token.
+    updater = Updater(os.getenv("TELEGRAM_KEY"), use_context=True)
+
     # Run schedules to check if there are jobs to run
-    schedules = SchedulesJob()
+    schedules = SchedulesJob(bot = updater.bot)
     schedules.setup()
 
     Schedule.queue = schedules.queue;
-    # Create the Updater and pass it your bot's token.
-    updater = Updater(os.getenv("TELEGRAM_KEY"), use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
