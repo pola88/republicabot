@@ -1,5 +1,9 @@
 ## RepublicaBeerBot
 
+## 0.0.8
+
+* Add monitoring to check bluetooth connection
+
 ## 0.0.7
 
 * Fixes schedule to turn watering on

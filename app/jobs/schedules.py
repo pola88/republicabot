@@ -4,7 +4,7 @@ import schedule
 import threading
 import queue
 from db import Schedule
-from bluetooth import Watering
+from bluetooth import Watering, Status
 from random import randint
 
 # Enable logging
@@ -23,7 +23,7 @@ class SchedulesJob():
         if self.queue is None:
             self.queue =  queue.Queue()
         self.is_running = True
-        self.worker = threading.Thread(name="MySchedules", target=self.__run_or_update)
+        self.worker = threading.Thread(name="Schedules", target=self.__run_or_update)
         self.worker.start()
         self.__updated()
 
@@ -44,6 +44,7 @@ class SchedulesJob():
             schedule.every().days.at(sched[1]).do(self.turn_on, sched[2])
 
         logger.info("Schedules updated")
+        self.add_monitoring()
 
     def turn_on(self, duration):
         Watering(randint(0, 1000)).on(duration=duration, callback=self.callback, callback_error=self.callback_error)
@@ -61,3 +62,21 @@ class SchedulesJob():
     def callback_error(self, msg):
         logger.error(msg)
         self.bot.send_message(int(os.getenv("USER_ID")), "Schedules::Error {}".format(msg))
+
+    def add_monitoring(self):
+        schedule.every().hours.do(self.monitoring)
+        logger.info("Monitoring job addded")
+
+    def monitoring(self):
+        try:
+            Status(msgid).check(self.status_callback, callback_error=self.callback_error)
+        except Exception as e:
+            self.callback_error("Monitoring error: {}".format(str(e)))
+
+    def status_callback(self, msg):
+        result = int(msg)
+        logger.info(msg)
+        if result == 1:
+            logger.info("Monitoring result: It's all ok")
+        else:
+            self.callback_error("There was a problem in the response")

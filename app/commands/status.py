@@ -26,9 +26,9 @@ class StatusCommand(Base):
         result = int(msg)
         self.logger.info(msg)
         if result == 1:
-            self.bot.send_message(self.message.chat.id, "Arduino says: I'm ok! ")
+            self.bot.send_message(self.message.chat.id, "It's all ok")
         else:
-            self.bot.send_message(self.message.chat.id, "There was a problem, Check and try later")
+            self.bot.send_message(self.message.chat.id, "There was a problem in the response")
 
     def report_error(self, msg):
         self.logger.error(msg)
