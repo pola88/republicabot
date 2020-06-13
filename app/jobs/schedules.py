@@ -64,12 +64,12 @@ class SchedulesJob():
         self.bot.send_message(int(os.getenv("USER_ID")), "Schedules::Error {}".format(msg))
 
     def add_monitoring(self):
-        schedule.every().hours.do(self.monitoring)
+        schedule.every().hour.do(self.monitoring)
         logger.info("Monitoring job addded")
 
     def monitoring(self):
         try:
-            Status(msgid).check(self.status_callback, callback_error=self.callback_error)
+            Status(randint(0, 1000)).check(self.status_callback, callback_error=self.callback_error)
         except Exception as e:
             self.callback_error("Monitoring error: {}".format(str(e)))
 
