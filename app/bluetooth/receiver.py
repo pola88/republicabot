@@ -23,12 +23,12 @@ class Receiver(Connection):
                         self.logging.info(self.msg)
                         self.is_waiting = False
             except serial.SerialTimeoutException as serialTimeout:
-                self.loggin.error("Serial timeout")
+                self.logging.error("Serial timeout")
                 self.callback_error("Serial timeout")
                 self.is_waiting = False
             except Exception as e:
                 self.callback_error(str(e))
-                self.loggin.error(str(e))
+                self.logging.error(str(e))
                 self.is_waiting = False
             sleep(1)
         if self.msg:
