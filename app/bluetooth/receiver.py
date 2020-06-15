@@ -12,6 +12,8 @@ class Receiver(Connection):
     def __listener(self):
         self.is_waiting = True
         self.logging.info("Waiting msg");
+        self.msg = None
+
         while self.is_waiting:
             try:
                 if(self.ser.in_waiting > 0):
@@ -31,7 +33,7 @@ class Receiver(Connection):
                 self.logging.error(str(e))
                 self.is_waiting = False
             sleep(1)
-        if self.msg:
+        if self.msg is not None:
             self.callback(self.msg)
 
     def listen(self, callback, callback_error):
