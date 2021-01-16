@@ -44,7 +44,7 @@ class SchedulesJob():
             schedule.every().days.at(sched[1]).do(self.turn_on, sched[2])
 
         logger.info("Schedules updated")
-        self.add_monitoring()
+        # self.add_monitoring()
 
     def turn_on(self, duration):
         Watering(randint(0, 1000)).on(duration=duration, callback=self.callback, callback_error=self.callback_error)
