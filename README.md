@@ -26,3 +26,7 @@ temperature - Devuelve la temperatura y humedad del ambiente
 * 2 - Watering on
 * 3 - Watering off
 * 4 - Temperature
+
+### Run in dev:
+
+$ pipenv run python ./app/main.py

@@ -29,11 +29,11 @@ class Base:
     @classmethod
     def handler(cls, bot):
         """Build the Handler of command"""
-        return CommandHandler(cls.command, cls.callbackHandler(bot), cls.filters())
+        return CommandHandler(cls.command, cls.callbackHandler(bot))
 
     @classmethod
     def filters(cls):
-        return (Filters.chat(int(os.getenv("GROUP_ID"))) | Filters.chat(int(os.getenv("USER_ID"))))
+        (Filters.chat(int(os.getenv("GROUP_ID"))) | Filters.chat(int(os.getenv("USER_ID"))))
 
     @classmethod
     def callbackHandler(cls, bot):
