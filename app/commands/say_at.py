@@ -13,7 +13,7 @@ class SayAtCommand(Base):
         """Handler the command /SayAt <msg>"""
         def callback(update, context):
             sayAtCommand = SayAtCommand(bot, update.message)
-            questionCommand.send_typing()
+            sayAtCommand.send_typing()
 
             msg = update.message.text.replace("/say_at ", "").split("-")
             sasyAtCommand.job = schedule.every().day.at(msg[0].strip()).do(sayAtCommand.send_msg, msg[1].strip())
