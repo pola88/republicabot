@@ -16,7 +16,7 @@ class SayAtCommand(Base):
             sayAtCommand.send_typing()
 
             msg = update.message.text.replace("/say_at ", "").split("-")
-            sasyAtCommand.job = schedule.every().day.at(msg[0].strip()).do(sayAtCommand.send_msg, msg[1].strip())
+            sayAtCommand.job = schedule.every().day.at(msg[0].strip()).do(sayAtCommand.send_msg, msg[1].strip())
 
             update.message.reply_text("Listo a las " + msg[0].strip() + " mando el mensasje")
 
@@ -25,4 +25,4 @@ class SayAtCommand(Base):
     def send_msg(self, msg):
       self.bot.sendChatAction(chat_id=int(os.getenv("LA_35_GROUP")) , action=ChatAction.TYPING)
       self.bot.send_message(int(os.getenv("LA_35_GROUP")), msg)
-      shcedule.cancel_job(self.job)
+      schedule.cancel_job(self.job)
