@@ -9,7 +9,7 @@ from telegram.ext.filters import Filters
 
 from commands import (StatusCommand, HelpCommand, StartCommand, Alcohol70Command,
                       ScheduleCommand, WateringCommand, QuestionCommand, DrinkCommand,
-                      TemperatureCommand)
+                      TemperatureCommand, SayCommand)
 from jobs import SchedulesJob
 from db import Setup, Schedule
 
@@ -50,6 +50,7 @@ def main():
     QuestionCommand.setup(updater)
     Alcohol70Command.setup(updater)
     DrinkCommand.setup(updater)
+    SayCommand.setup(updater)
     # TemperatureCommand.setup(updater)
 
     # log all errors
